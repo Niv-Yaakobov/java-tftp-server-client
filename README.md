@@ -1,39 +1,115 @@
-# Java TFTP Server & Client
+# Java TFTP Server & Client (Extended Protocol)
 
-This project implements an extended version of the TFTP (Trivial File Transfer Protocol) in Java using TCP. It was developed for a systems programming course and includes both the server and client components.
+This project implements an extended version of the Trivial File Transfer Protocol (TFTP) using Java TCP sockets. It supports file upload, download, deletion, directory listing, and client management over a binary protocol. Built as a major assignment for the **Systems Programming** course.
 
-The server follows the **Thread-per-Client (TPC)** design pattern, while the client supports interactive file upload/download commands. The communication protocol uses binary-encoded messages based on the extended TFTP spec.
+## 🎯 Objective
 
-## 🧠 Project Features
+- Build a custom server based on the **Thread-per-Client (TPC)** pattern using generics and interfaces.
+- Develop a functional command-line **client**.
+- Design a **binary message encoder/decoder** and a complete **TFTP-based protocol** with client-server communication.
 
-### Server
+## 🧱 Key Components
 
-- Thread-per-client architecture
-- Binary encoder/decoder for packet types
-- Full TFTP protocol support:
-  - Login (`LOGRQ`)
-  - File upload (`WRQ`)
-  - File download (`RRQ`)
-  - File deletion (`DELRQ`)
-  - Directory listing (`DIRQ`)
-  - Disconnect (`DISC`)
-- Error handling with TFTP-specific error codes
-- Broadcast notifications (`BCAST`) to all clients on file add/delete
+### ✅ Server
 
-### Client
+- Accepts multiple clients using a `TPCServer` loop.
+- Each connection spawns a handler implementing `ConnectionHandler<T>`.
+- Uses `ConnectionsImpl<T>` to broadcast messages or target specific clients.
+- Supports `BidiMessagingProtocol<T>` for bi-directional messaging.
 
-- Two-thread architecture: keyboard input + server listener
-- Supports command-line interaction (RRQ, WRQ, DIRQ, LOGRQ, etc.)
-- Local validation (e.g., file existence)
-- Handles DATA, ACK, BCAST, and ERROR packets
+### ✅ Client
 
-## ⚙️ Technologies Used
+- Two threads:
+  - `KeyboardThread` — reads and encodes commands from user input.
+  - `ListeningThread` — listens for server responses and handles protocol decoding.
+- Interacts with server using binary-encoded messages (UTF-8, big-endian format).
 
-- Java 11+
-- Maven
-- TCP sockets
-- Java NIO
-- UTF-8 encoding
+## 🧪 Supported TFTP Commands
 
-## 🗂️ Project Structure
+| Command | Description |
+|---------|-------------|
+| `LOGRQ <username>` | Logs into the server |
+| `WRQ <filename>` | Uploads file to server |
+| `RRQ <filename>` | Downloads file from server |
+| `DELRQ <filename>` | Deletes file from server |
+| `DIRQ` | Lists all server files |
+| `DISC` | Disconnects from server |
 
+## 📂 Project Structure
+
+```
+java-tftp-server-client/
+├── server/
+│   ├── src/
+│   │   └── main/java/bgu/spl/net/impl/tftp/
+│   ├── Files/                   # Server-side file storage
+│   └── pom.xml
+├── client/
+│   ├── src/
+│   │   └── main/java/bgu/spl/net/impl/tftp/
+│   └── pom.xml
+└── README.md
+```
+
+## 🧠 Packet Format
+
+Each message starts with a **2-byte opcode** followed by fields specific to the command.
+
+### Example: `LOGRQ` Packet
+```
+[0, 7] + <username bytes> + [0]
+```
+
+### Other Opcodes
+| Opcode | Command |
+|--------|---------|
+| 1 | RRQ (Read Request) |
+| 2 | WRQ (Write Request) |
+| 3 | DATA |
+| 4 | ACK |
+| 5 | ERROR |
+| 6 | DIRQ |
+| 7 | LOGRQ |
+| 8 | DELRQ |
+| 9 | BCAST |
+| 10 | DISC |
+
+## ⚙️ How to Run
+
+### 🖥️ Run the Server
+
+```bash
+cd server
+mvn compile
+mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.tftp.TftpServer" -Dexec.args="7777"
+```
+
+### 💻 Run the Client
+
+```bash
+cd client
+mvn compile
+mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.tftp.TftpClient" -Dexec.args="127.0.0.1 7777"
+```
+
+## 🧪 Testing Tips
+
+- Test file uploads/downloads with `.mp3`, `.txt`, or any other valid files.
+- Try error cases (e.g., sending `RRQ` without logging in).
+- Use UTF-8 filenames with spaces — they are supported.
+- You can simulate a client using a **Rust test client**:  
+  [https://github.com/bguspl/TFTP-rust-client](https://github.com/bguspl/TFTP-rust-client)
+
+## 🔧 Developer Notes
+
+- Use `TftpEncoderDecoder` to encode/decode binary protocol messages.
+- Protocol implementation is in `TftpProtocol`.
+- All input/output is handled through `ConnectionHandler<T>` and `Connections<T>`.
+- You **must** use **Big-endian** byte order for all numbers.
+
+## ✍️ Author
+
+- [Your Name](https://github.com/yourusername)
+
+> Project developed as part of **SPL241 – Systems Programming**  
+> Ben-Gurion University, Spring 2024
