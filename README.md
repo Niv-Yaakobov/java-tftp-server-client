@@ -35,22 +35,6 @@ This project implements an extended version of the Trivial File Transfer Protoco
 | `DIRQ` | Lists all server files |
 | `DISC` | Disconnects from server |
 
-## 📂 Project Structure
-
-```
-java-tftp-server-client/
-├── server/
-│   ├── src/
-│   │   └── main/java/bgu/spl/net/impl/tftp/
-│   ├── Files/                   # Server-side file storage
-│   └── pom.xml
-├── client/
-│   ├── src/
-│   │   └── main/java/bgu/spl/net/impl/tftp/
-│   └── pom.xml
-└── README.md
-```
-
 ## 🧠 Packet Format
 
 Each message starts with a **2-byte opcode** followed by fields specific to the command.
@@ -109,7 +93,7 @@ mvn exec:java -Dexec.mainClass="bgu.spl.net.impl.tftp.TftpClient" -Dexec.args="1
 
 ## ✍️ Author
 
-- [Your Name](https://github.com/yourusername)
+- [Niv Yaakobobv](https://github.com/Niv-Yaakobov)
 
 > Project developed as part of **SPL241 – Systems Programming**  
 > Ben-Gurion University, Spring 2024
